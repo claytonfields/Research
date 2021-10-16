@@ -198,7 +198,7 @@ plot(diabetes2$weight, diabetes2$waist)
 
 
 
-
+## Bone Density
 data(bone, package = "loon.data")
 summary(bone)
 summary(bone)
@@ -207,6 +207,11 @@ x <- bone$age
 y <- bone$rspnbmd
 
 plot(x,y)
+
+## Pima Diabetes
+pima = read_csv('data/diabetes 4.csv')
+plot(pima$BMI, pima$Glucose)
+plot(pima$SkinThickness, pima$Glucose)
 
 
 
