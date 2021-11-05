@@ -38,6 +38,7 @@ xi_2 = 21
 xi_3 = 44
 xi_4 = 60
 xi = c(xi_1, xi_2, xi_3, xi_4)
+cp = c(m_true, xi)
 
 #  Generate X
 X = seq(from=0, to=100, length.out = n)
@@ -77,56 +78,87 @@ get_df = function(){
     c4 = numeric(),
     c5 = numeric(),
     c6 = numeric(),
-    c7 = numeric(),
-    c8 = numeric(),
-    c9 = numeric(),
-    c10 = numeric()
+    loglik = numeric(),
+    penalty = numeric(),
+    penlik = numeric(),
+    truelik = numeric(),
+    truepen = numeric(),
+    truepenlike = numeric()
   )
 }
 
 # Data Structures
 results_ga = get_df()
+# results_ga_0001 =  get_df()
 # results_ar = get_df()
 # results_sc = get_df()
 # results_dp = get_df()
 # results_sg = get_df()
 
 # Parameters for GA
-p.mut = .01
+p.mut = .1
 max.itr = 150
-x.inc = 20
+x.inc = 1000
+x.min = min(X)
+x.max = max(X)
 
 # Parameters for aridge
-k = 100
-knots = seq(min(X), max(X), length = k + 2)[-c(1, k + 2)]
-degree <- 1
-pen = 10 ^ seq(-4, 4, 0.25)
-x_seq = seq(min(X), max(X), length = 1000)
-epsilon = .001
+# k = 100
+# knots = seq(min(X), max(X), length = k + 2)[-c(1, k + 2)]
+# degree <- 1
+# pen = 10 ^ seq(-4, 4, 0.25)
+# x_seq = seq(min(X), max(X), length = 1000)
+# epsilon = .001
 
 # Parameters for strucchange
-h = 75
+# h = 75
 
 
-
-start_pos = 201
-end_pos = 230
+start_pos = 231
+end_pos = 240
 for(i in start_pos:end_pos){
   loop_start = proc.time()  
   seed_i = 1000*(i-1)+543
+  set.seed(seed_i)
   eps = rnorm(n,0,sigma)
   y = y_true + eps
   dfi = tibble(X,y)
   print(paste('Iteration',i))
+  print(y[1])
   
   # GA
   ga.out = ga.cpt_Norm(y=y, x=X,fitness=pnllik.MDL.M0Z, p.mut=p.mut, x.inc=x.inc,
-                       max.itr=max.itr,seed=seed_i, is.print = FALSE)
+                       max.itr=max.itr,seed=seed_i, is.print = FALSE, is.graphic = FALSE)
   chrom.sol = ga.out$solution
   m = chrom.sol[1]
-  row = c(i,seed_i,chrom.sol,rep(0,10-m))
+  log.lik = nloglik.M0Z_glm(y,NULL,X,chrom.sol) 
+  pen.mdl = penalty.MDL(y,X,chrom.sol,x.min, x.max, x.inc)
+  penlik = pnllik.MDL.M0Z(y,NULL,X,chrom.sol,x.min,x.max,x.inc) 
+  
+  true.log.lik = nloglik.M0Z_glm(y,NULL,X,cp) 
+  true.pen.mdl = penalty.MDL(y,X,cp,x.min, x.max, x.inc)
+  true.pen.lik = true.log.lik+true.pen.mdl
+  
+  row = c(i,seed_i,chrom.sol,rep(0,6-m),log.lik,pen.mdl,penlik,true.log.lik,true.pen.mdl,true.pen.lik)
   results_ga[nrow(results_ga)+1,] = row
   print(m)
+  
+  # ga.out = ga.cpt_Norm(y=y, x=X,fitness=pnllik.MDL.M0Z, p.mut=.0001, x.inc=x.inc,
+  #                      max.itr=max.itr,seed=seed_i, is.print = FALSE)
+  # 
+  # chrom.sol = ga.out$solution
+  # m = chrom.sol[1]
+  # log.lik = nloglik.M0Z_glm(y,NULL,X,chrom.sol) 
+  # pen.mdl = penalty.MDL(y,X,chrom.sol,x.min, x.max, x.inc)
+  # penlik = pnllik.MDL.M0Z(y,NULL,X,chrom.sol,x.min,x.max,x.inc) 
+  # 
+  # true.log.lik = nloglik.M0Z_glm(y,NULL,X,cp) 
+  # true.pen.mdl = penalty.MDL(y,X,cp,x.min, x.max, x.inc)
+  # true.pen.lik = true.log.lik+true.pen.mdl
+  # 
+  # row = c(i,seed_i,chrom.sol,rep(0,6-m),log.lik,pen.mdl,penlik,true.log.lik,true.pen.mdl,true.pen.lik)
+  # results_ga_0001[nrow(results_ga)+1,] = row
+  # print(m)
 
   # ## Segmented
   # fit_lm = lm(y ~  X, data = dfi)  # intercept-only model
@@ -164,14 +196,17 @@ for(i in start_pos:end_pos){
   # print(loop_end)
 }
 
+
+
+
 ## Write to file
-# write_csv(results_ga, paste('results_ga_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
+# write_csv(results_ga, paste('results_ga_',m_true,'_v02_i_',n,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_ar, paste('results_ar_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_dp, paste('results_dp_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_sg, paste('results_sg_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 
 
-program_end =  proc.time() - begin
+# program_end =  proc.time() - begin
 
 ## Utility Functions
 prop_correct = function(df,m_true){
@@ -191,8 +226,6 @@ get_cp = function(df){
 print('Proportion Correct GA')
 print(prop_correct(results_ga,m_true))
 print('Proportion Correct SC')
-print(prop_correct(results_sc,m_true))
-
-
-
-
+# print(prop_correct(results_sc,m_true))
+# mle(y, X, x.min, x.max, x.inc, g, Confg,  fitness, z = NULL, gen.size = 200,
+#               is.graphic = FALSE, Confg.pre.sol.lik= NULL )

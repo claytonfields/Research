@@ -3,21 +3,31 @@ penalty.MDL <- function(y,x,cp,x.min, x.max, x.inc) {                  # y   : r
   # x   : predictor with varying coefficient
   # cp  : cpt chromosome (m;xi_1,...,xi_m)
   m <- cp[1]                                       # m   : number of cpts
-  
+  m.max = 10
+  n = length(x)
   if (m == 0) {
-    pnt <- 0
+    pnt <- log(n)
   } else {
     xi <- c(x.min-x.inc,cp[-1],x.max+x.inc)        # xi  : cpt locations (xi_1,...,xi_m,x.max+x.inc)
     n.r <- numeric(length=m+1)                     # n.r : no. of obs in each regime
     for (i in 1:(m+1)) {                           # [!CAUTION!] This does not handle missing values!
       n.r[i] <- length(y[xi[i] <= x & x < xi[i+1]])
     }
+    rank = cumsum(n.r)
     # Try rank scheme for penalty term
-    # pnt <- log(m+1)+sum(log(sort(n.r)[-1]))+2.0*sum(log(n.r[-1])) # Modify last term
-    # pnt <- log(m+1)+.5*sum(log(sort(n.r)[-1]))+sum(log(xi[-1]))  # change n.r to xi
-      pnt <- log(m+1)+sum(log(sort(n.r)[-1]))+0.5*sum(log(n.r[-1])) # original
+    # pnt <- log(m+1)+.5*sum(log(sort(n.r)[-1])) #hange n.r to xi
+    # 
+    ## Look at Jasa 2012 for MDL terms
+    
+    ## Compare logliklihood using true knots 
+    ## vs our modles
+    ## break up likelihood into three terms, likelihood, penalty and combo
+    
+    # 1 on n=250, .933 on n=1000
+    pnt <- log(m+1) + (m+2)*log(n) + .5*sum(log(n.r[-1])) # + .5*sum(log(sort(n.r)[-1]))# try with m instead
+    # pnt = (m+3)*log(n)
+    ## Try BIC
   }
-  
   return(pnt)                                      # smaller is better
 }
 
@@ -74,7 +84,8 @@ nloglik.M0Z_glm <- function(y,z,x,cp) {            # y   : response
   
   fit.MLE_out <- glm(y~X,family=gaussian(link="identity"),start=c(rep(0.5,1+p),rep(0,m)))
   nllik.glm <- -as.numeric(logLik(fit.MLE_out))
-  
+  pen.bic = BIC(fit.MLE_out)
+  # pen.aic = AIC(fit.MLE_out)
   return(nllik.glm)
 }
 ###
@@ -108,7 +119,7 @@ pnllik.MDL.M0Z <- function(y,z,x,cp,x.min,x.max,x.inc) {             # y   : res
   # i.g : indicator variable for group
   # cp  : changepoint chromosome (m; tau_1,...,tau_m)
   # link: link function for Poisson regression
-  pnllik.MDL <- nloglik.M0Z_glm(y=y,z=z,x=x,cp=cp)+penalty.MDL(y=y,x=x,cp=cp,x.min=x.min,x.max=x.max,x.inc=x.inc)
+  pnllik.MDL <- nloglik.M0Z_glm(y=y,z=z,x=x,cp=cp) +penalty.MDL(y=y,x=x,cp=cp,x.min=x.min,x.max=x.max,x.inc=x.inc)
   
   return(pnllik.MDL)
 }
