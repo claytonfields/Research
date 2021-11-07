@@ -28,7 +28,11 @@ source(file=paste(WD.lib,"mle_lin_02.R",sep=""))
 ### Dataset 5
 ##  Linear, 4 changepoints
 # Parameters
+<<<<<<< Updated upstream
 n = 250
+=======
+n = 150
+>>>>>>> Stashed changes
 sigma = 3
 m_true = 4
 
@@ -98,7 +102,9 @@ results_ga = get_df()
 # Parameters for GA
 p.mut = .01
 max.itr = 150
-x.inc = 20
+
+
+x.inc = 13
 x.min = min(X)
 x.max = max(X)
 

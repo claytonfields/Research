@@ -24,7 +24,8 @@ penalty.MDL <- function(y,x,cp,x.min, x.max, x.inc) {                  # y   : r
     ## break up likelihood into three terms, likelihood, penalty and combo
     
     # 1 on n=250, .933 on n=1000
-    pnt <- log(m+1) + (m+2)*log(n) + .5*sum(log(n.r[-1])) # + .5*sum(log(sort(n.r)[-1]))# try with m instead
+    # pnt <- log(m+1) + (m)*log(n) + .5*sum(log(n.r[-1])) # + .5*sum(log(sort(n.r)[-1]))# try with m instead
+    pnt <- log(m+1)+sum(log(sort(n.r)[-1]))+0.5*sum(log(n.r[-1]))
     # pnt = (m+3)*log(n)
     ## Try BIC
   }
