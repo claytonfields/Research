@@ -7,13 +7,13 @@
 program_start = proc.time()  
 # Required packages
 library(tidyverse)
-library(strucchange)
-library(dpseg)
-library(segmented)
-library(aspline)
+# library(strucchange)
+# library(dpseg)
+# library(segmented)
+# library(aspline)
 
 ### Setup library, data, and output directories
-WD.lib = c('Fields/experimental/')
+WD.lib = c('R/Fields/experimental/')
 WD.inp = c('data/')
 ### Load the proposed GA and fitted model likelihood funtion packages
 source(file=paste(WD.lib,"ga_cont_02.R",sep=""))
@@ -28,7 +28,7 @@ source(file=paste(WD.lib,"mle_lin_02.R",sep=""))
 ### Dataset 5
 ##  Linear, 4 changepoints
 # Parameters
-n = 1000
+n = 250
 sigma = 3
 m_true = 4
 
@@ -96,9 +96,9 @@ results_ga = get_df()
 # results_sg = get_df()
 
 # Parameters for GA
-p.mut = .1
+p.mut = .01
 max.itr = 150
-x.inc = 1000
+x.inc = 20
 x.min = min(X)
 x.max = max(X)
 
@@ -114,8 +114,8 @@ x.max = max(X)
 # h = 75
 
 
-start_pos = 231
-end_pos = 240
+start_pos = 1
+end_pos = 100
 for(i in start_pos:end_pos){
   loop_start = proc.time()  
   seed_i = 1000*(i-1)+543
@@ -200,7 +200,7 @@ for(i in start_pos:end_pos){
 
 
 ## Write to file
-# write_csv(results_ga, paste('results_ga_',m_true,'_v02_i_',n,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
+write_csv(results_ga, paste('results_ga_',m_true,'_v02_i_',n,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_ar, paste('results_ar_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_dp, paste('results_dp_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
 # write_csv(results_sg, paste('results_sg_',m_true,'_v01_i_',start_pos,'_',end_pos,'_',p.mut,'_',max.itr,'_',x.inc, sep=''))
