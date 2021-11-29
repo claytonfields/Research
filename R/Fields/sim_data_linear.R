@@ -7,9 +7,9 @@ library(modelr)
 #### Dataset 1
 ### Linear, no changepoints
 ##  Generate X
-
-
 n = 1000
+m_true = 0
+
 X = seq(from=0, to=100, length.out = n)
 
 y_true = 1.245*X
@@ -19,7 +19,8 @@ y = y_true + eps
 
 
 df2 = tibble(X,y,y_true)
-ggplot(df2) + geom_point(aes(X,y), color='gray') 
+ggplot(df2) + geom_point(aes(X,y), color='gray')  + 
+  geom_line(aes(X,y_true), color = 'red')
 
 
 
@@ -187,7 +188,6 @@ df2 %>% add_predictions(mod) %>%
 ###  Linear, 5 changepoints
 n = 1000
 seed = 2244
-rnorm(1)
 sigma = 3
 m_true = 5
 ##  Generate X

@@ -53,8 +53,8 @@ df0 = tibble(X,y,y_true)
 ggplot(df0) + geom_point(aes(X,y),color='gray') +
   geom_line(aes(X,y_true),color='red') + 
   ggtitle('Linear Model: 4 Changepoints')
-ggsave('sim_study_data/examples/linear_4cpts.png')
-write_csv(df0,'sim_study_data/examples/linear_4cpts.csv')
+ggsave(paste('sim_study_data/examples/linear_4cpts_',n,'.png',sep=''))
+write_csv(df0,paste('sim_study_data/examples/linear_4cpts_',n,'.csv',sep=''))
 
 
 ## Simulation study results: GA
@@ -62,20 +62,20 @@ write_csv(df0,'sim_study_data/examples/linear_4cpts.csv')
 # max.itr = 150
 # x.inc = 45
 # ga = read_csv('sim_study_data/4_changepoints/150_05_45/ga/results_ga_4_v01_i_1_1000_0.01_150_45')
-ga1 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_1_77_150')
-ga2 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_78_155_150')
-ga3 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_156_233_150')
-ga4 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_234_311_150')
-ga5 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_312_389_150')
-ga6 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_390_467_150')
-ga7 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_468_545_150')
-ga8 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_546_623_150')
-ga9 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_624_701_150')
-ga10 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_702_779_150')
-ga11 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_780_857_150')
-ga12 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_858_935_150')
-ga13 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_936_1000_150')
-ga = rbind(ga1,ga2,ga3,ga4,ga5,ga6,ga7,ga8,ga10,ga11,ga12,ga13)
+ga1 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_1_77_150_0.5')
+ga2 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_78_155_150_0.5')
+ga3 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_156_233_150_0.5.csv')
+ga4 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_234_311_150_0.5')
+ga5 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_312_389_150_0.5')
+ga6 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_390_467_150_0.5')
+ga7 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_468_545_150_0.5')
+ga8 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_546_623_150_0.5')
+ga9 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_624_701_150_0.5')
+ga10 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_702_779_150_0.5.csv')
+ga11 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_780_857_150_0.5.csv')
+ga12 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_858_935_150_0.5.csv')
+ga13 = read_csv('sim_study_data/4_changepoints/n_150/ga/results_ga_4_v01_i_936_1000_150_0.5.csv')
+ga = rbind(ga1,ga2,ga3,ga4,ga5,ga6,ga7,ga8,ga9,ga10,ga11,ga12,ga13)
 
 # Proportion where m==m_true
 ga_correct = prop_correct(ga,m_true)
@@ -86,23 +86,29 @@ ggplot(ga_cp) + geom_histogram(aes(cp))
 # Average value of m
 mean(ga$m)
 
+num_3 = ga %>% filter(m==3) %>%nrow() 
+num_4 = ga %>% filter(m==4) %>%nrow()  
+num_5 = ga %>% filter(m==5) %>%nrow()  
+num_6 = ga %>% filter(m==6) %>%nrow()  
+
+
 
 
 ## Strucchange
-sc1 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_1_77_150')
-sc2 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_78_155_150')
-sc3 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_156_233_150')
-sc4 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_234_311_150')
-sc5 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_312_389_150')
-sc6 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_390_467_150')
-sc7 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_468_545_150')
-sc8 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_546_623_150')
-sc9 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_624_701_150')
-sc10 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_702_779_150')
-sc11 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_780_857_150')
-sc12 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_858_935_150')
-sc13 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_936_1000_150')
-sc = rbind(sc1,sc2,sc3,sc4,sc5,sc6,sc7,sc8,sc10,sc11,sc12,sc13)
+sc1 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_1_77_150_4')
+sc2 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_78_155_150_4')
+sc3 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_156_233_150_4.csv')
+sc4 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_234_311_150_4')
+sc5 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_312_389_150_4')
+sc6 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_390_467_150_4')
+sc7 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_468_545_150_4')
+sc8 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_546_623_150_4')
+sc9 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_624_701_150_4')
+sc10 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_702_779_150_4.csv')
+sc11 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_780_857_150_4.csv')
+sc12 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_858_935_150_4.csv')
+sc13 = read_csv('sim_study_data/4_changepoints/n_150/sc/results_sc_4_v01_i_936_1000_150_4.csv')
+sc = rbind(sc1,sc2,sc4,sc5,sc6,sc7,sc8,sc9)#,sc10,sc11,sc12,sc13)
 
 # Proportion where m==m_true
 sc_correct = prop_correct(sc,m_true)

@@ -2,6 +2,16 @@
 ### GA for a continuous covariate x in a simple normal regression model
 #*[-----------------------------------------------------------------------------------------------]*#
 
+get.n.r = function(x, xi, x.inc){
+  m = length(xi)
+  n.r <- numeric(length=m+1)                     # n.r : no. of obs in each regime
+  xi <- c(min(x)-x.inc,xi,max(x)+x.inc)  
+  for (i in 1:(m+1)) {                           # [!CAUTION!] This does not handle missing values!
+    n.r[i] <- length(y[xi[i] <= x & x < xi[i+1]])
+  }
+  return(n.r)
+}
+
 
 ### Utility Function: Get ML estimates for a given generation of chromosomes (called in ga.cpt_Norm)
 mle = function(y, x, x.min, x.max, x.inc, g, Confg,  fitness, z = null, gen.size = 200,
@@ -42,7 +52,7 @@ mle = function(y, x, x.min, x.max, x.inc, g, Confg,  fitness, z = null, gen.size
 
 
 ### Utility Function: Generate initial generation from random values (called in ga.cpt_Norm)
-initial_population  = function(x, x.min, x.max, x.inc, gen.size, max.cpt, 
+initial_population  = function(x, x.min, x.max, x.inc, min.samp, gen.size, max.cpt, 
                                is.print=TRUE, is.graphic= FALSE){
   ## Args refrence those in ga.cpt_Norm
   
@@ -55,7 +65,7 @@ initial_population  = function(x, x.min, x.max, x.inc, gen.size, max.cpt,
     # [!CAUTION!] Adjust prob=0.4 for other settings
     n.cpt <- rbinom(1,size=max.cpt,prob=0.4)     
     # Changepoints will occur between x.min+x.inc and x.max-x.inc
-    x.cpt <- sort(runif(n.cpt,min=x.min+x.inc,max=x.max-x.inc)) 
+    x.cpt <- sort(runif(n.cpt,min=x.min+x.inc,max=x.max-x.inc)) # 
     chrom <- c(n.cpt,x.cpt)                      
     Confg[[j]] <- chrom
     
@@ -64,7 +74,10 @@ initial_population  = function(x, x.min, x.max, x.inc, gen.size, max.cpt,
     if (n.cpt == 0) {
       is.pass <- TRUE
     } else {
-      if (all(diff(c(x.min,x.cpt,x.max)) > x.inc) & # do not allow a changepoint within x.inc of x
+      n.r = get.n.r(x,x.cpt,x.inc)
+      # print("n.r, line 78")
+      # print(sum(n.r))
+      if (all(n.r > min.samp) & # Change to a function of n
           x.min < min(x.cpt) &                      # smallest location shold be > x.min
           max(x.cpt) < x.max) {                     # greatest location shold be < x.max
         is.pass <- TRUE
@@ -78,7 +91,7 @@ initial_population  = function(x, x.min, x.max, x.inc, gen.size, max.cpt,
 }
 
 ### Utility Function: Generate next gneration based on previous ML estimates (called in ga.cpt_Norm)
-next_gen = function(Confg.pre, Confg.pre.sol, probs, x.min, x.max, x.inc, gen.size, p.mut){
+next_gen = function(x, Confg.pre, Confg.pre.sol, probs, x.min, x.max, x.inc, min.samp,  gen.size, p.mut){
   ## Args refrence those in ga.cpt_Norm
   
   Confg = list()
@@ -130,7 +143,7 @@ next_gen = function(Confg.pre, Confg.pre.sol, probs, x.min, x.max, x.inc, gen.si
     if (n.cpt == 0) {
       is.pass <- TRUE
     } else {
-      if (all(diff(c(x.min,x.cpt,x.max)) > x.inc) & # do not allow a changepoint within x.inc of x
+      if (all(get.n.r(x,x.cpt,x.inc) > min.samp) & # do not allow a changepoint within x.inc of x
           x.min < min(x.cpt) &                   # smallest location shold be > x.min
           max(x.cpt) < x.max) {                  # greatest location shold be < x.max
         is.pass <- TRUE
@@ -157,7 +170,7 @@ export = function(g,Confg, Pnlik, WD.out){
 
 
 ### Main Function to Execute GA for changepoint detection
-ga.cpt_Norm <- function(y, x , fitness, p.mut, z = NULL, x.min = NULL, x.max = NULL, x.inc = 30,
+ga.cpt_Norm <- function(y, x , fitness, p.mut, z = NULL, x.min = NULL, x.max = NULL, a = .5, min.samp= 5,
                         gen.size = 200, max.itr = 150, seed=2244, max.cpt = 10, 
                         is.graphic = FALSE, is.print = TRUE, is.export = FALSE,
                         WD.out = NULL) {
@@ -182,13 +195,19 @@ ga.cpt_Norm <- function(y, x , fitness, p.mut, z = NULL, x.min = NULL, x.max = N
   set.seed(seed)
   
   ## Define range of x values
+  # a * [ (x.max - x.min) / n ]
   if(is.null(x.min)){
     x.min <- min(x,na.rm=TRUE)
   }
   if(is.null(x.max)){
     x.max <- max(x,na.rm=TRUE)
   }
-  x.inc <- (x.max-x.min)/x.inc
+  n = length(x)
+  x.inc <- a*((x.max-x.min)/n)
+  # n = length(x)
+  ## pick a constant, e.g. 6
+  
+  # print(paste('min.samp =',min.samp,'line 204'))
   
   ## Changepoint configuration data structures
   Confg <- list()                                  # changepoint configuration for a generation
@@ -199,14 +218,16 @@ ga.cpt_Norm <- function(y, x , fitness, p.mut, z = NULL, x.min = NULL, x.max = N
   
   ## Initial generation   
   # Generate inital generation
-  Confg = initial_population(x = x, x.min = x.min, x.max = x.max, x.inc = x.inc,
+  Confg = initial_population(x = x, x.min = x.min, x.max = x.max, x.inc = x.inc, min.samp=min.samp,
                              gen.size = gen.size, max.cpt = max.cpt, 
                              is.print=is.print, is.graphic= is.graphic)
   # Get and store MLE estimates for Initial generation
   Pnlik[1,] = mle(y = y, x = x, x.min=x.min, x.max=x.max, x.inc=x.inc, g=1, fitness = fitness,
                   z = z, Confg=Confg,  gen.size = gen.size)
   loc.sol <- which(Pnlik[1,] == min(Pnlik[1,]))
+  # print('loc.sol line 226')
   # print(loc.sol)
+  # print( min(Pnlik[1,]))
   chrom.sol <- Confg[[loc.sol]]
   Confg.sol[[1]] <- chrom.sol
   Confg.ALL[[1]] <- Confg
@@ -226,7 +247,7 @@ ga.cpt_Norm <- function(y, x , fitness, p.mut, z = NULL, x.min = NULL, x.max = N
     Confg.pre <- Confg.ALL[[g-1]]
     Confg.pre.sol <- Confg.sol[[g-1]]
     Confg.pre.sol.lik = Pnlik.sol[g-1]
-    Confg = next_gen(Confg.pre, Confg.pre.sol, probs, x.min, x.max, x.inc, gen.size, p.mut)
+    Confg = next_gen(x,Confg.pre, Confg.pre.sol, probs, x.min, x.max, x.inc, min.samp, gen.size, p.mut)
     
     #Get and Store ML estimates for geration g
     Pnlik[g,] = mle(y = y, x = x, x.min=x.min, x.max=x.max, x.inc=x.inc,

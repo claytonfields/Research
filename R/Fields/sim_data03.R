@@ -37,3 +37,5 @@ df0 = tibble(X,y,y_true)
 ggplot(df0) + geom_point(aes(X,y),color='gray') +
   geom_line(aes(X,y_true),color='red') + 
   ggtitle('Linear Model: 4 Changepoints')
+
+

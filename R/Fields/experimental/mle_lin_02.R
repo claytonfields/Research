@@ -6,28 +6,17 @@ penalty.MDL <- function(y,x,cp,x.min, x.max, x.inc) {                  # y   : r
   m.max = 10
   n = length(x)
   if (m == 0) {
-    pnt <- log(n)
+    pnt <- 0
   } else {
     xi <- c(x.min-x.inc,cp[-1],x.max+x.inc)        # xi  : cpt locations (xi_1,...,xi_m,x.max+x.inc)
     n.r <- numeric(length=m+1)                     # n.r : no. of obs in each regime
     for (i in 1:(m+1)) {                           # [!CAUTION!] This does not handle missing values!
       n.r[i] <- length(y[xi[i] <= x & x < xi[i+1]])
     }
-    rank = cumsum(n.r)
-    # Try rank scheme for penalty term
-    # pnt <- log(m+1)+.5*sum(log(sort(n.r)[-1])) #hange n.r to xi
-    # 
-    ## Look at Jasa 2012 for MDL terms
     
-    ## Compare logliklihood using true knots 
-    ## vs our modles
-    ## break up likelihood into three terms, likelihood, penalty and combo
-    
-    # 1 on n=250, .933 on n=1000
     # pnt <- log(m+1) + (m)*log(n) + .5*sum(log(n.r[-1])) # + .5*sum(log(sort(n.r)[-1]))# try with m instead
-    pnt <- log(m+1)+sum(log(sort(n.r)[-1]))+0.5*sum(log(n.r[-1]))
-    # pnt = (m+3)*log(n)
-    ## Try BIC
+    # pnt <- log(m+1)+sum(log(sort(n.r)[-1]))+0.5*sum(log(n.r[-1]))
+    pnt <- log(m+1)+sum(log(n.r[-1]+1))+0.5*sum(log(n.r[-1]))
   }
   return(pnt)                                      # smaller is better
 }
