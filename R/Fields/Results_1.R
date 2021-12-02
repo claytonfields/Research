@@ -60,24 +60,16 @@ ggplot(ga_cp) + geom_histogram(aes(cp))
 
 
 
-## Simulation study results: dp
-dp = read_csv('data/sim_study/1_changepoints/dp/results_dp_1_v01_i_1_1000_0.01_150_45')
-# Proportion where m==m_true
-dp_correct = prop_correct(dp,m_true)
-ggplot(dp)+geom_histogram(aes(m))
-# Visualize changepoints
-dp_cp = get_cp(dp)
-ggplot(dp_cp) + geom_histogram(aes(cp))
-# write_csv(dp,'data/sim_study/1_changepoints/dp/results_dp_1_v01_i_1_1000_0.01_150_45')
+
 
 ## Simulation study results: sg
-sg = read_csv('data/sim_study/1_changepoints/sg/results_sg_1_v01_i_1_1000_0.01_150_45')
-# Proportion where m==m_true
-sg_correct = prop_correct(sg,m_true)
-ggplot(sg)+geom_histogram(aes(m))
-# Visualize changepoints
-sg_cp = get_cp(sg)
-ggplot(sg_cp) + geom_histogram(aes(cp))
+# sg = read_csv('data/sim_study/1_changepoints/sg/results_sg_1_v01_i_1_1000_0.01_150_45')
+# # Proportion where m==m_true
+# sg_correct = prop_correct(sg,m_true)
+# ggplot(sg)+geom_histogram(aes(m))
+# # Visualize changepoints
+# sg_cp = get_cp(sg)
+# ggplot(sg_cp) + geom_histogram(aes(cp))
 
 
 print(paste('Proportion ga, where m==m_true: ',ga_correct))

@@ -24,24 +24,32 @@ source(file=paste(WD.lib,"mle_lin_02.R",sep=""))
 ### Dataset 6: 5 changepoints
 #*[-----------------------------------------------------------------------------------------------]*#
 
-#### Dataset 1
-### Linear, no changepoints
-##  Generate X
-
-
+## Dataset 3
+# Linear, 2 changepoints
+# Parameters
 n = 150
+sigma = 3
+m_true = 2
+#  Generate X
+xi_1 = 26
+xi_2 = 70
+xi = c(2,xi_1, xi_2)
 X = seq(from=0, to=100, length.out = n)
-
-y_true = 1.245*X
-eps = rnorm(n,0,3)
-
+X1 = X[X < xi_1]
+X2 = X[X >= xi_1 & X < xi_2]
+X3 = X[X >= xi_2]
+# Generate y
+y1 = -.6*X1 + 67.4
+y2 = 2*X2
+y3 = -.4*X3+168
+y_true = c(y1,y2,y3)
+eps = rnorm(n,0,sigma)
 y = y_true + eps
-
-
-df2 = tibble(X,y,y_true)
-ggplot(df2) + geom_point(aes(X,y), color='gray') 
-
-
+# Plot
+df0 = tibble(X,y,y_true)
+ggplot(df0) + geom_point(aes(X,y), color='gray') + 
+  geom_line(aes(X,y_true), color='red') + 
+  ggtitle('Linear Model: 2 Changepoint')
 
 ### Find structural changes via the proposed GA method
 ## Utility Functions
@@ -70,7 +78,7 @@ results_sc = get_df()
 # Parameters for GA
 p.mut = .01
 max.itr = 150
-a = .5
+a = 20
 x.min = min(X)
 x.max = max(X)
 
@@ -78,8 +86,8 @@ x.max = max(X)
 h = 4
 
 
-start_pos = 1
-end_pos = 20
+start_pos = 41
+end_pos = 60
 for(i in start_pos:end_pos){
   loop_start = proc.time()  
   seed_i = 1000*(i-1)+543
@@ -91,15 +99,15 @@ for(i in start_pos:end_pos){
   print(y[1])
   
   # GA
-  # ga.out = ga.cpt_Norm(y=y, x=X,fitness=pnllik.MDL.M0Z, p.mut=p.mut, a=a, min.samp = 6,
-  #                      max.itr=max.itr,seed=seed_i, is.print = FALSE, is.graphic = FALSE)
-  # chrom.sol = ga.out$solution
-  # m = chrom.sol[1]
-  # 
-  # 
-  # row = c(i,seed_i,chrom.sol,rep(0,10-m))
-  # results_ga[nrow(results_ga)+1,] = row
-  # print(m)
+  ga.out = ga.cpt_Norm(y=y, x=X,fitness=pnllik.MDL.M0Z, p.mut=p.mut, a=a, min.samp = 6,
+                       max.itr=max.itr,seed=seed_i, is.print = FALSE, is.graphic = FALSE)
+  chrom.sol = ga.out$solution
+  m = chrom.sol[1]
+
+
+  row = c(i,seed_i,chrom.sol,rep(0,10-m))
+  results_ga[nrow(results_ga)+1,] = row
+  print(m)
 
   
   
